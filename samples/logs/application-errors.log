@@ -1,0 +1,5 @@
+2026-07-30T18:15:01Z ERROR [payments] [payments-2] Downstream charge failed event_type=payment.failed order_id=8101 trace_id=trace-pay-01
+2026-07-30T18:15:16Z ERROR [payments] [payments-2] Downstream charge failed event_type=payment.failed order_id=8102 trace_id=trace-pay-02
+2026-07-30T18:15:31Z ERROR [payments] [payments-3] Downstream charge failed event_type=payment.failed order_id=8103 trace_id=trace-pay-03
+2026-07-30T18:15:46Z ERROR [payments] [payments-3] Downstream charge failed event_type=payment.failed order_id=8104 trace_id=trace-pay-04
+2026-07-30T18:16:01Z ERROR [payments] [payments-2] Downstream charge failed event_type=payment.failed order_id=8105 trace_id=trace-pay-05

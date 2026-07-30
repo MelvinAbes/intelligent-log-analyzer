@@ -5,6 +5,7 @@ build/
 .cache/
 data/
 *.log
+!samples/logs/*.log
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/

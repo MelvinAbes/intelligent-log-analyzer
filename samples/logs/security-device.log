@@ -1,0 +1,5 @@
+<84>1 2026-07-30T18:30:10Z edge-7 identity-agent 301 authentication.failed [context subject_id="analyst-17" trace_id="trace-auth-01"] Invalid password
+<84>1 2026-07-30T18:31:10Z edge-7 identity-agent 301 authentication.failed [context subject_id="analyst-17" trace_id="trace-auth-02"] Invalid password
+<84>1 2026-07-30T18:32:10Z edge-7 identity-agent 301 authentication.failed [context subject_id="analyst-17" trace_id="trace-auth-03"] Invalid password
+<86>1 2026-07-30T18:33:10Z edge-7 identity-agent 301 authentication.succeeded [context subject_id="analyst-17" trace_id="trace-auth-04"] Authentication accepted
+<85>1 2026-07-30T18:34:10Z edge-7 identity-agent 301 privilege.changed [context subject_id="analyst-17" trace_id="trace-auth-05"] Administrative role granted
