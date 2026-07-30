@@ -36,5 +36,6 @@ public record AnalysisProperties(
             @NotBlank String provider,
             @NotBlank String baseUrl,
             @NotBlank String model,
-            String apiToken) {}
+            String apiToken,
+            @NotNull Duration timeout) {}
 }

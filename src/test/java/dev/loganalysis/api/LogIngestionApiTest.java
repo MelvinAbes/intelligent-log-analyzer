@@ -102,6 +102,12 @@ class LogIngestionApiTest {
         mockMvc.perform(get("/api/v1/incidents/{id}/timeline", incidentId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(5));
+        mockMvc.perform(post("/api/v1/incidents/{id}/summary", incidentId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.mode").value("deterministic"))
+                .andExpect(jsonPath("$.provider").value("disabled"))
+                .andExpect(jsonPath("$.fallbackReason").value("provider_disabled"))
+                .andExpect(jsonPath("$.summary").isNotEmpty());
         mockMvc.perform(
                         get("/api/v1/statistics")
                                 .param("from", "2026-07-30T09:00:00Z")

@@ -38,7 +38,11 @@ class IncidentDetectorTest {
                         new AnalysisProperties.DetectionSettings(
                                 5, Duration.ofMinutes(5), 10, 3.0, Duration.ofMinutes(10)),
                         new AnalysisProperties.SummarySettings(
-                                "disabled", "http://127.0.0.1", "local", ""));
+                                "disabled",
+                                "http://127.0.0.1",
+                                "local",
+                                "",
+                                Duration.ofSeconds(2)));
     }
 
     @Test

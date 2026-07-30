@@ -70,3 +70,4 @@ analysis:
     base-url: ${ILA_SUMMARY_BASE_URL:http://127.0.0.1:11434/v1}
     model: ${ILA_SUMMARY_MODEL:qwen2.5:3b}
     api-token: ${ILA_SUMMARY_API_TOKEN:}
+    timeout: ${ILA_SUMMARY_TIMEOUT:PT15S}
