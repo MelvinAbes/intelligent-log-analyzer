@@ -33,3 +33,32 @@ and rejected counts. This avoids adding queue infrastructure while retaining rec
 Detectors return immutable candidates containing a rule code, grouping key, event identifiers,
 observed values, and thresholds. Incident reconciliation persists that evidence and links the
 timeline events. Provider-assisted text cannot change rule evidence or severity.
+
+## Import sequence
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant Database
+    participant Worker
+    participant Storage
+    participant Analysis
+
+    Client->>API: Multipart log file
+    API->>Storage: Save generated storage key
+    API->>Database: Create QUEUED import
+    API-->>Client: 202 Accepted and import ID
+    Worker->>Database: Claim job and lease row
+    loop bounded line batches
+        Worker->>Storage: Read next lines
+        Worker->>Analysis: Parse, redact, persist, detect
+        Analysis->>Database: Events, incidents, timeline links
+        Worker->>Database: Update progress and lease
+    end
+    Worker->>Database: Mark COMPLETED
+```
+
+Detection windows are half-open for repeated errors and spikes. This prevents an event on an exact
+boundary from contributing to two windows. Sequence detection includes the privilege-change event
+at the end of its evidence interval.
