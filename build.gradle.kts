@@ -30,8 +30,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3")
-    runtimeOnly("org.postgresql:postgresql")
+    runtimeOnly("org.postgresql:postgresql:42.7.12")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
+
+    checkstyle("com.puppycrawl.tools:checkstyle:13.9.0")
+    checkstyle("org.codehaus.plexus:plexus-utils:3.6.1")
 
     testImplementation("com.tngtech.archunit:archunit-junit5:1.4.2")
     testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
