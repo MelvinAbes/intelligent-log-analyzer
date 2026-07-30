@@ -128,6 +128,11 @@ public class IncidentEntity {
         updatedAt = now;
     }
 
+    public void reopen(Instant now) {
+        status = IncidentStatus.OPEN;
+        updatedAt = now;
+    }
+
     public UUID getId() {
         return id;
     }

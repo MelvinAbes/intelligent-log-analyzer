@@ -2,6 +2,8 @@ package dev.loganalysis.api;
 
 import dev.loganalysis.importing.InvalidImportException;
 import dev.loganalysis.importing.LogImportNotFoundException;
+import dev.loganalysis.query.IncidentNotFoundException;
+import dev.loganalysis.query.InvalidQueryException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.Map;
@@ -22,6 +24,16 @@ public class ApiExceptionHandler {
     @ExceptionHandler(LogImportNotFoundException.class)
     ProblemDetail importNotFound(LogImportNotFoundException error, HttpServletRequest request) {
         return problem(HttpStatus.NOT_FOUND, "log_import_not_found", error.getMessage(), request);
+    }
+
+    @ExceptionHandler(IncidentNotFoundException.class)
+    ProblemDetail incidentNotFound(IncidentNotFoundException error, HttpServletRequest request) {
+        return problem(HttpStatus.NOT_FOUND, "incident_not_found", error.getMessage(), request);
+    }
+
+    @ExceptionHandler(InvalidQueryException.class)
+    ProblemDetail invalidQuery(InvalidQueryException error, HttpServletRequest request) {
+        return problem(HttpStatus.BAD_REQUEST, "invalid_query", error.getMessage(), request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

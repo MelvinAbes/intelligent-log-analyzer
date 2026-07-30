@@ -62,7 +62,7 @@ class LogIngestionApiTest {
                                 index ->
                                         """
                     {"line":"2026-07-30T10:00:0%dZ ERROR [payments] [api-1] \
-                    event_type=payment.failed order=%d"}
+                    Payment failed event_type=payment.failed order=%d"}
                     """
                                                 .formatted(index, 100 + index)
                                                 .strip())
@@ -89,6 +89,28 @@ class LogIngestionApiTest {
                             assertThat(incident.getEvidence()).containsEntry("threshold", 5);
                         });
         assertThat(incidentEventRepository.count()).isEqualTo(5);
+
+        String incidentId = incidentRepository.findAll().getFirst().getId().toString();
+        mockMvc.perform(
+                        get("/api/v1/log-events")
+                                .param("service", "payments")
+                                .param("severity", "ERROR")
+                                .param("q", "payment failed"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(5))
+                .andExpect(jsonPath("$.items[0].service").value("payments"));
+        mockMvc.perform(get("/api/v1/incidents/{id}/timeline", incidentId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(5));
+        mockMvc.perform(
+                        get("/api/v1/statistics")
+                                .param("from", "2026-07-30T09:00:00Z")
+                                .param("to", "2026-07-30T11:00:00Z")
+                                .param("bucket", "MINUTE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalEvents").value(5))
+                .andExpect(jsonPath("$.openIncidents").value(1))
+                .andExpect(jsonPath("$.busiestServices[0].name").value("payments"));
     }
 
     @Test
