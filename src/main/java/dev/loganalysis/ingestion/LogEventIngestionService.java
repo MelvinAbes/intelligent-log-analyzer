@@ -2,6 +2,7 @@ package dev.loganalysis.ingestion;
 
 import dev.loganalysis.event.domain.LogEvent;
 import dev.loganalysis.event.domain.LogFormat;
+import dev.loganalysis.incident.analysis.IncidentAnalysisService;
 import dev.loganalysis.parsing.LogEventFactory;
 import dev.loganalysis.parsing.LogParsingException;
 import dev.loganalysis.parsing.ParseHints;
@@ -21,15 +22,18 @@ public class LogEventIngestionService {
 
     private final LogEventFactory eventFactory;
     private final LogEventRepository eventRepository;
+    private final IncidentAnalysisService incidentAnalysisService;
     private final Counter acceptedCounter;
     private final Counter rejectedCounter;
 
     public LogEventIngestionService(
             LogEventFactory eventFactory,
             LogEventRepository eventRepository,
+            IncidentAnalysisService incidentAnalysisService,
             MeterRegistry meterRegistry) {
         this.eventFactory = eventFactory;
         this.eventRepository = eventRepository;
+        this.incidentAnalysisService = incidentAnalysisService;
         acceptedCounter =
                 Counter.builder("log_analysis.events.ingested")
                         .description("Accepted normalized log events")
@@ -84,7 +88,8 @@ public class LogEventIngestionService {
                 accepted.stream()
                         .map(event -> new LogEventEntity(event, logImport, event.lineNumber()))
                         .toList();
-        eventRepository.saveAll(entities);
+        eventRepository.saveAllAndFlush(entities);
+        incidentAnalysisService.analyze(accepted);
         acceptedCounter.increment(accepted.size());
         rejectedCounter.increment(rejected.size());
         return new BatchIngestionResult(accepted, rejected);

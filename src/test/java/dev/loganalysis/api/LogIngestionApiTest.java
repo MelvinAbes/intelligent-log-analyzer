@@ -10,6 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import dev.loganalysis.TestcontainersConfiguration;
 import dev.loganalysis.importing.LogImportWorker;
+import dev.loganalysis.persistence.repository.IncidentEventRepository;
+import dev.loganalysis.persistence.repository.IncidentRepository;
 import dev.loganalysis.persistence.repository.LogEventRepository;
 import dev.loganalysis.persistence.repository.LogImportRepository;
 import java.nio.charset.StandardCharsets;
@@ -41,11 +43,52 @@ class LogIngestionApiTest {
     @Autowired private LogImportWorker importWorker;
     @Autowired private LogEventRepository eventRepository;
     @Autowired private LogImportRepository importRepository;
+    @Autowired private IncidentRepository incidentRepository;
+    @Autowired private IncidentEventRepository incidentEventRepository;
 
     @BeforeEach
     void cleanDatabase() {
+        incidentEventRepository.deleteAll();
+        incidentRepository.deleteAll();
         eventRepository.deleteAll();
         importRepository.deleteAll();
+    }
+
+    @Test
+    void repeatedErrorsCreateOneExplainableIncident() throws Exception {
+        String entries =
+                java.util.stream.IntStream.range(0, 5)
+                        .mapToObj(
+                                index ->
+                                        """
+                    {"line":"2026-07-30T10:00:0%dZ ERROR [payments] [api-1] \
+                    event_type=payment.failed order=%d"}
+                    """
+                                                .formatted(index, 100 + index)
+                                                .strip())
+                        .collect(java.util.stream.Collectors.joining(","));
+        String request =
+                """
+        {
+          "format": "APPLICATION",
+          "entries": [%s]
+        }
+        """
+                        .formatted(entries);
+
+        mockMvc.perform(post("/api/v1/log-events").contentType("application/json").content(request))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.acceptedCount").value(5));
+
+        assertThat(incidentRepository.findAll())
+                .singleElement()
+                .satisfies(
+                        incident -> {
+                            assertThat(incident.getRuleCode()).isEqualTo("repeated_error");
+                            assertThat(incident.getSeverity().name()).isEqualTo("HIGH");
+                            assertThat(incident.getEvidence()).containsEntry("threshold", 5);
+                        });
+        assertThat(incidentEventRepository.count()).isEqualTo(5);
     }
 
     @Test

@@ -3,6 +3,7 @@ package dev.loganalysis.ingestion;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import dev.loganalysis.event.domain.LogFormat;
+import dev.loganalysis.incident.analysis.IncidentAnalysisService;
 import dev.loganalysis.parsing.AccessLogParser;
 import dev.loganalysis.parsing.ApplicationLogParser;
 import dev.loganalysis.parsing.JsonLinesLogParser;
@@ -27,6 +28,7 @@ class LogEventIngestionServiceTest {
     @Test
     void returnsAcceptedEventsAndSafePerLineRejections() {
         LogEventRepository repository = Mockito.mock(LogEventRepository.class);
+        IncidentAnalysisService analysisService = Mockito.mock(IncidentAnalysisService.class);
         LogParserRegistry registry =
                 new LogParserRegistry(
                         List.of(
@@ -41,7 +43,8 @@ class LogEventIngestionServiceTest {
                         new MessageFingerprint(),
                         Clock.fixed(Instant.parse("2026-07-30T10:05:00Z"), ZoneOffset.UTC));
         LogEventIngestionService service =
-                new LogEventIngestionService(factory, repository, new SimpleMeterRegistry());
+                new LogEventIngestionService(
+                        factory, repository, analysisService, new SimpleMeterRegistry());
 
         BatchIngestionResult result =
                 service.ingest(
@@ -57,6 +60,8 @@ class LogEventIngestionServiceTest {
         assertThat(result.acceptedCount()).isEqualTo(1);
         assertThat(result.rejectedCount()).isEqualTo(1);
         assertThat(result.rejections().getFirst().code()).isEqualTo("unknown_format");
-        Mockito.verify(repository).saveAll(Mockito.argThat(values -> values.iterator().hasNext()));
+        Mockito.verify(repository)
+                .saveAllAndFlush(Mockito.argThat(values -> values.iterator().hasNext()));
+        Mockito.verify(analysisService).analyze(Mockito.argThat(values -> values.size() == 1));
     }
 }

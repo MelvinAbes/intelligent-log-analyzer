@@ -4,5 +4,9 @@ public enum IncidentSeverity {
     LOW,
     MEDIUM,
     HIGH,
-    CRITICAL
+    CRITICAL;
+
+    public boolean atLeast(IncidentSeverity other) {
+        return ordinal() >= other.ordinal();
+    }
 }
