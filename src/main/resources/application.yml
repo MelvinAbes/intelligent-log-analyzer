@@ -55,6 +55,10 @@ analysis:
     max-lines: ${ILA_MAX_IMPORT_LINES:100000}
     max-line-length: ${ILA_MAX_LINE_LENGTH:16384}
     batch-size: ${ILA_IMPORT_BATCH_SIZE:500}
+    lease-duration: ${ILA_IMPORT_LEASE_DURATION:PT2M}
+    poll-interval-ms: ${ILA_IMPORT_POLL_INTERVAL_MS:1000}
+    initial-delay-ms: ${ILA_IMPORT_INITIAL_DELAY_MS:1000}
+    worker-enabled: ${ILA_IMPORT_WORKER_ENABLED:true}
   detection:
     repeated-error-threshold: ${ILA_REPEATED_ERROR_THRESHOLD:5}
     repeated-error-window: ${ILA_REPEATED_ERROR_WINDOW:PT5M}

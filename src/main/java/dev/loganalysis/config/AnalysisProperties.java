@@ -22,7 +22,8 @@ public record AnalysisProperties(
             @NotNull Path storagePath,
             @Min(1) @Max(1_000_000) int maxLines,
             @Min(256) @Max(65_536) int maxLineLength,
-            @Min(1) @Max(5_000) int batchSize) {}
+            @Min(1) @Max(5_000) int batchSize,
+            @NotNull Duration leaseDuration) {}
 
     public record DetectionSettings(
             @Min(2) int repeatedErrorThreshold,

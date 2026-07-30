@@ -10,7 +10,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "log_imports")
@@ -49,6 +54,10 @@ public class LogImportEntity {
 
     @Column(name = "failure_code", length = 64)
     private String failureCode;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "rejection_samples", nullable = false, columnDefinition = "jsonb")
+    private List<Map<String, String>> rejectionSamples = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
@@ -112,13 +121,20 @@ public class LogImportEntity {
         this.leaseUntil = leaseUntil;
     }
 
-    public void recordBatch(int total, int accepted, int rejected, Instant leaseUntil) {
+    public void recordBatch(
+            int total,
+            int accepted,
+            int rejected,
+            List<Map<String, String>> samples,
+            Instant leaseUntil) {
         if (status != ImportStatus.PROCESSING) {
             throw new IllegalStateException("only processing imports can record progress");
         }
         totalLines += total;
         acceptedLines += accepted;
         rejectedLines += rejected;
+        int remainingSampleCapacity = Math.max(0, 10 - rejectionSamples.size());
+        samples.stream().limit(remainingSampleCapacity).forEach(rejectionSamples::add);
         this.leaseUntil = leaseUntil;
     }
 
@@ -183,6 +199,10 @@ public class LogImportEntity {
 
     public String getFailureCode() {
         return failureCode;
+    }
+
+    public List<Map<String, String>> getRejectionSamples() {
+        return rejectionSamples.stream().map(Map::copyOf).toList();
     }
 
     public Instant getCreatedAt() {

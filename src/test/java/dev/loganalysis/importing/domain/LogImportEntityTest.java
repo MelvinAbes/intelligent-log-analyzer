@@ -24,13 +24,19 @@ class LogImportEntityTest {
                         createdAt);
 
         logImport.start(createdAt.plusSeconds(1), createdAt.plus(Duration.ofMinutes(2)));
-        logImport.recordBatch(10, 8, 2, createdAt.plus(Duration.ofMinutes(3)));
+        logImport.recordBatch(
+                10,
+                8,
+                2,
+                java.util.List.of(java.util.Map.of("line", "4", "code", "invalid_timestamp")),
+                createdAt.plus(Duration.ofMinutes(3)));
         logImport.complete(createdAt.plus(Duration.ofMinutes(1)));
 
         assertThat(logImport.getStatus()).isEqualTo(ImportStatus.COMPLETED);
         assertThat(logImport.getTotalLines()).isEqualTo(10);
         assertThat(logImport.getAcceptedLines()).isEqualTo(8);
         assertThat(logImport.getRejectedLines()).isEqualTo(2);
+        assertThat(logImport.getRejectionSamples()).hasSize(1);
     }
 
     @Test
