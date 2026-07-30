@@ -1,0 +1,72 @@
+name: intelligent-log-analyzer
+
+services:
+  postgres:
+    image: postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193
+    environment:
+      POSTGRES_DB: log_analysis
+      POSTGRES_USER: log_analysis
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U log_analysis -d log_analysis"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
+    restart: unless-stopped
+
+  application:
+    build:
+      context: .
+    environment:
+      ILA_DATABASE_URL: jdbc:postgresql://postgres:5432/log_analysis
+      ILA_DATABASE_USERNAME: log_analysis
+      ILA_DATABASE_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      ILA_DATABASE_POOL_SIZE: ${ILA_DATABASE_POOL_SIZE:-10}
+      ILA_IMPORT_STORAGE_PATH: /app/data/imports
+      ILA_SUMMARY_PROVIDER: ${ILA_SUMMARY_PROVIDER:-disabled}
+      ILA_SUMMARY_BASE_URL: ${ILA_SUMMARY_BASE_URL:-http://host.docker.internal:11434/v1}
+      ILA_SUMMARY_MODEL: ${ILA_SUMMARY_MODEL:-qwen2.5:3b}
+      ILA_SUMMARY_API_TOKEN: ${ILA_SUMMARY_API_TOKEN:-}
+      ILA_SUMMARY_TIMEOUT: ${ILA_SUMMARY_TIMEOUT:-PT15S}
+    ports:
+      - "127.0.0.1:${ILA_PORT:-8080}:8080"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--output-document=-",
+          "http://127.0.0.1:8080/actuator/health/readiness"
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 20s
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - import_data:/app/data/imports
+    networks:
+      - internal
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  import_data:
