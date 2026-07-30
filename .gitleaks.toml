@@ -1,0 +1,11 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Generated local build, scanner cache, and runtime data"
+paths = [
+  '''(^|/)\.cache/''',
+  '''(^|/)\.gradle/''',
+  '''(^|/)build/''',
+  '''(^|/)data/''',
+]
