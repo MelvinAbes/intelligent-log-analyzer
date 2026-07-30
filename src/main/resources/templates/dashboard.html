@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Operational log analysis and incident investigation dashboard">
+  <title>Log Analysis Console</title>
+  <link rel="stylesheet" href="/assets/dashboard.css">
+  <script src="/assets/dashboard.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Log Analysis Console home">
+      <span class="brand-mark" aria-hidden="true">LA</span>
+      <span>
+        <strong>Log Analysis Console</strong>
+        <small>Incident investigation workspace</small>
+      </span>
+    </a>
+    <nav class="top-actions" aria-label="Application links">
+      <span class="health" id="health-indicator"><span></span> Checking service</span>
+      <a class="button button-secondary" href="/swagger-ui.html">API reference</a>
+      <button class="button" id="refresh-button" type="button">Refresh data</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-heading">
+      <div>
+        <p class="eyebrow">OPERATIONS / OVERVIEW</p>
+        <h1>Service activity and detected incidents</h1>
+        <p>Review normalized events, transparent detection evidence, and incident timelines.</p>
+      </div>
+      <p class="last-updated">Updated <time id="last-updated">—</time></p>
+    </section>
+
+    <section class="metric-grid" aria-label="Summary metrics">
+      <article class="metric">
+        <p>Events · 24 hours</p>
+        <strong id="metric-events">—</strong>
+        <small id="metric-range">Waiting for data</small>
+      </article>
+      <article class="metric metric-alert">
+        <p>Open incidents</p>
+        <strong id="metric-incidents">—</strong>
+        <small>Requires investigation</small>
+      </article>
+      <article class="metric">
+        <p>Error events</p>
+        <strong id="metric-errors">—</strong>
+        <small>ERROR and FATAL severity</small>
+      </article>
+      <article class="metric">
+        <p>Busiest service</p>
+        <strong class="metric-text" id="metric-service">—</strong>
+        <small id="metric-service-count">No events in range</small>
+      </article>
+    </section>
+
+    <section class="dashboard-grid">
+      <article class="panel trend-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">VOLUME</p>
+            <h2>Event activity</h2>
+          </div>
+          <span class="panel-note">Hourly buckets · UTC</span>
+        </div>
+        <div class="trend-chart" id="trend-chart" aria-label="Event volume by hour"></div>
+      </article>
+
+      <article class="panel severity-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">DISTRIBUTION</p>
+            <h2>Severity mix</h2>
+          </div>
+        </div>
+        <div class="severity-list" id="severity-list"></div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">INCIDENT QUEUE</p>
+          <h2>Detected patterns</h2>
+        </div>
+        <div class="segmented" role="group" aria-label="Incident status">
+          <button class="segment active" type="button" data-incident-status="OPEN">Open</button>
+          <button class="segment" type="button" data-incident-status="RESOLVED">Resolved</button>
+          <button class="segment" type="button" data-incident-status="">All</button>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Severity</th>
+              <th>Incident</th>
+              <th>Rule</th>
+              <th>Window</th>
+              <th>Events</th>
+              <th><span class="visually-hidden">Action</span></th>
+            </tr>
+          </thead>
+          <tbody id="incident-rows"></tbody>
+        </table>
+      </div>
+      <p class="empty-state" id="incident-empty" hidden>No incidents match this view.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">EVENT EXPLORER</p>
+          <h2>Search normalized logs</h2>
+        </div>
+        <span class="panel-note" id="event-count">—</span>
+      </div>
+      <form class="filter-form" id="event-filter">
+        <label>
+          <span>Free text</span>
+          <input type="search" name="q" placeholder="timeout, trace ID, endpoint…">
+        </label>
+        <label>
+          <span>Service</span>
+          <input type="text" name="service" placeholder="payments">
+        </label>
+        <label>
+          <span>Severity</span>
+          <select name="severity">
+            <option value="">All severities</option>
+            <option>TRACE</option>
+            <option>DEBUG</option>
+            <option>INFO</option>
+            <option>WARN</option>
+            <option>ERROR</option>
+            <option>FATAL</option>
+          </select>
+        </label>
+        <button class="button filter-submit" type="submit">Search events</button>
+      </form>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Severity</th>
+              <th>Service / source</th>
+              <th>Message</th>
+              <th>Event type</th>
+            </tr>
+          </thead>
+          <tbody id="event-rows"></tbody>
+        </table>
+      </div>
+      <p class="empty-state" id="event-empty" hidden>No log events match these filters.</p>
+    </section>
+
+    <section class="panel import-panel">
+      <div>
+        <p class="eyebrow">IMPORT</p>
+        <h2>Submit a log file</h2>
+        <p>Accepted formats: application logs, JSON Lines, syslog, and combined access logs.</p>
+      </div>
+      <form class="import-form" id="import-form">
+        <label>
+          <span>Log file</span>
+          <input type="file" name="file" accept=".log,.txt,.jsonl" required>
+        </label>
+        <label>
+          <span>Parser</span>
+          <select name="format">
+            <option>AUTO</option>
+            <option>APPLICATION</option>
+            <option>JSON_LINES</option>
+            <option>SYSLOG</option>
+            <option>ACCESS_LOG</option>
+          </select>
+        </label>
+        <button class="button" type="submit">Start import</button>
+      </form>
+      <p class="import-status" id="import-status" role="status"></p>
+    </section>
+  </main>
+
+  <dialog id="incident-dialog">
+    <div class="dialog-heading">
+      <div>
+        <p class="eyebrow">INCIDENT DETAIL</p>
+        <h2 id="detail-title">Incident</h2>
+      </div>
+      <button class="icon-button" id="close-dialog" type="button" aria-label="Close incident detail">×</button>
+    </div>
+    <div class="detail-meta" id="detail-meta"></div>
+    <section class="detail-section">
+      <h3>Deterministic summary</h3>
+      <p id="detail-summary"></p>
+    </section>
+    <section class="detail-section">
+      <h3>Rule evidence</h3>
+      <dl class="evidence-grid" id="detail-evidence"></dl>
+    </section>
+    <section class="detail-section">
+      <h3>Timeline</h3>
+      <ol class="timeline" id="detail-timeline"></ol>
+    </section>
+    <div class="dialog-actions">
+      <button class="button button-secondary" id="summary-button" type="button">Generate configured summary</button>
+      <button class="button" id="status-button" type="button">Mark resolved</button>
+    </div>
+    <p class="assisted-summary" id="assisted-summary" hidden></p>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
