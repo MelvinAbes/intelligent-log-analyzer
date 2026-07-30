@@ -2,7 +2,10 @@ name: intelligent-log-analyzer
 
 services:
   postgres:
-    image: postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193
+    image: intelligent-log-analyzer-postgres:local
+    build:
+      context: .
+      dockerfile: docker/postgres/Dockerfile
     environment:
       POSTGRES_DB: log_analysis
       POSTGRES_USER: log_analysis

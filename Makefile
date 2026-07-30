@@ -53,6 +53,9 @@ image-scan:
 	docker run --rm -v trivy_cache:/root/.cache -v /var/run/docker.sock:/var/run/docker.sock \
 		aquasec/trivy:0.72.0@sha256:cffe3f5161a47a6823fbd23d985795b3ed72a4c806da4c4df16266c02accdd6f \
 		image --severity HIGH,CRITICAL --exit-code 1 intelligent-log-analyzer-application
+	docker run --rm -v trivy_cache:/root/.cache -v /var/run/docker.sock:/var/run/docker.sock \
+		aquasec/trivy:0.72.0@sha256:cffe3f5161a47a6823fbd23d985795b3ed72a4c806da4c4df16266c02accdd6f \
+		image --severity HIGH,CRITICAL --exit-code 1 intelligent-log-analyzer-postgres:local
 
 secret-scan:
 	gitleaks dir . --redact --no-banner
