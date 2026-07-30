@@ -10,6 +10,7 @@ import java.util.UUID;
 public record IncidentResponse(
         UUID id,
         String ruleCode,
+        String groupingKey,
         IncidentSeverity severity,
         IncidentStatus status,
         String title,
@@ -25,6 +26,7 @@ public record IncidentResponse(
         return new IncidentResponse(
                 incident.getId(),
                 incident.getRuleCode(),
+                incident.getGroupingKey(),
                 incident.getSeverity(),
                 incident.getStatus(),
                 incident.getTitle(),

@@ -1,6 +1,6 @@
 GRADLE := ./gradlew
 
-.PHONY: format format-check lint test test-unit test-integration check build run audit secret-scan dependencies-lock
+.PHONY: format format-check lint test test-unit test-integration evaluate check build run audit secret-scan dependencies-lock
 
 format:
 	$(GRADLE) spotlessApply
@@ -19,6 +19,9 @@ test-unit:
 
 test-integration:
 	$(GRADLE) integrationTest
+
+evaluate:
+	$(GRADLE) evaluationTest
 
 check:
 	$(GRADLE) spotlessCheck check

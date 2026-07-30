@@ -1,0 +1,20 @@
+[
+  {
+    "label": "repeated payment failures",
+    "ruleCode": "repeated_error",
+    "evidenceKey": "service",
+    "evidenceValue": "payments"
+  },
+  {
+    "label": "gateway request spike",
+    "ruleCode": "event_spike",
+    "evidenceKey": "service",
+    "evidenceValue": "edge-gateway"
+  },
+  {
+    "label": "authentication and privilege sequence",
+    "ruleCode": "suspicious_privilege_sequence",
+    "evidenceKey": "subject_id",
+    "evidenceValue": "analyst-17"
+  }
+]

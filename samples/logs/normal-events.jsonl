@@ -1,0 +1,5 @@
+{"timestamp":"2026-07-30T18:35:00Z","source":"orders-1","service":"orders","severity":"INFO","event_type":"order.accepted","message":"Order accepted for processing","external_id":"normal-001","attributes":{"region":"eu-central"}}
+{"timestamp":"2026-07-30T18:35:12Z","source":"inventory-1","service":"inventory","severity":"INFO","event_type":"stock.reserved","message":"Inventory reservation completed","external_id":"normal-002","attributes":{"region":"eu-central"}}
+{"timestamp":"2026-07-30T18:35:24Z","source":"notifications-2","service":"notifications","severity":"INFO","event_type":"email.queued","message":"Transactional email queued","external_id":"normal-003","attributes":{"channel":"email"}}
+{"timestamp":"2026-07-30T18:35:36Z","source":"orders-1","service":"orders","severity":"DEBUG","event_type":"order.enriched","message":"Order enrichment completed","external_id":"normal-004","attributes":{"stage":"pricing"}}
+{"timestamp":"2026-07-30T18:35:48Z","source":"inventory-2","service":"inventory","severity":"WARN","event_type":"stock.low","message":"Stock below reorder level","external_id":"normal-005","attributes":{"warehouse":"berlin-1"}}

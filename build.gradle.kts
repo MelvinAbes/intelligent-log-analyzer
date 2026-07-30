@@ -78,7 +78,7 @@ tasks.withType<Test>().configureEach {
 
 tasks.test {
     useJUnitPlatform {
-        excludeTags("integration")
+        excludeTags("integration", "evaluation")
     }
 }
 
@@ -95,6 +95,26 @@ val integrationTest = tasks.register<Test>("integrationTest") {
 
 tasks.check {
     dependsOn(integrationTest)
+}
+
+val evaluationTest = tasks.register<Test>("evaluationTest") {
+    description = "Runs the labelled synthetic incident-detection evaluation."
+    group = "verification"
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+    useJUnitPlatform {
+        includeTags("evaluation")
+    }
+    systemProperty(
+        "evaluation.output",
+        layout.buildDirectory.file("reports/evaluation/incident-detection.json").get().asFile.path,
+    )
+    outputs.upToDateWhen { false }
+    shouldRunAfter(integrationTest)
+}
+
+tasks.check {
+    dependsOn(evaluationTest)
 }
 
 tasks.jacocoTestReport {
