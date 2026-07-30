@@ -14,14 +14,46 @@ public interface LogEventRepository extends JpaRepository<LogEventEntity, UUID> 
 
     boolean existsBySourceAndExternalId(String source, String externalId);
 
+    @Query(
+            """
+      select e from LogEventEntity e
+      where e.service = :service
+        and e.fingerprint = :fingerprint
+        and e.occurredAt >= :fromTime
+        and e.occurredAt < :toTime
+      order by e.occurredAt
+      """)
     List<LogEventEntity> findByServiceAndFingerprintAndOccurredAtBetweenOrderByOccurredAtAsc(
-            String service, String fingerprint, Instant from, Instant to);
+            @Param("service") String service,
+            @Param("fingerprint") String fingerprint,
+            @Param("fromTime") Instant from,
+            @Param("toTime") Instant to);
 
+    @Query(
+            """
+      select e from LogEventEntity e
+      where e.service = :service
+        and e.occurredAt >= :fromTime
+        and e.occurredAt < :toTime
+      order by e.occurredAt
+      """)
     List<LogEventEntity> findByServiceAndOccurredAtBetweenOrderByOccurredAtAsc(
-            String service, Instant from, Instant to);
+            @Param("service") String service,
+            @Param("fromTime") Instant from,
+            @Param("toTime") Instant to);
 
+    @Query(
+            """
+      select e from LogEventEntity e
+      where e.subjectId = :subjectId
+        and e.occurredAt >= :fromTime
+        and e.occurredAt <= :toTime
+      order by e.occurredAt
+      """)
     List<LogEventEntity> findBySubjectIdAndOccurredAtBetweenOrderByOccurredAtAsc(
-            String subjectId, Instant from, Instant to);
+            @Param("subjectId") String subjectId,
+            @Param("fromTime") Instant from,
+            @Param("toTime") Instant to);
 
     @Query(
             value =

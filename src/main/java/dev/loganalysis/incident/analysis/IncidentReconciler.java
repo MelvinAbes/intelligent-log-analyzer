@@ -38,27 +38,12 @@ public class IncidentReconciler {
     public UUID reconcile(IncidentCandidate candidate) {
         var narrative = summarizer.summarize(candidate);
         Instant now = clock.instant();
-        IncidentEntity incident =
-                incidentRepository
-                        .findByRuleCodeAndGroupingKeyAndWindowStart(
-                                candidate.ruleCode(),
-                                candidate.groupingKey(),
-                                candidate.windowStart())
-                        .orElseGet(
-                                () ->
-                                        new IncidentEntity(
-                                                candidate.ruleCode(),
-                                                candidate.groupingKey(),
-                                                candidate.severity(),
-                                                narrative.title(),
-                                                narrative.summary(),
-                                                candidate.windowStart(),
-                                                candidate.startedAt(),
-                                                candidate.endedAt(),
-                                                now,
-                                                candidate.eventIds().size(),
-                                                candidate.evidence()));
-        if (incident.getId() != null) {
+        var existing =
+                incidentRepository.findByRuleCodeAndGroupingKeyAndWindowStart(
+                        candidate.ruleCode(), candidate.groupingKey(), candidate.windowStart());
+        IncidentEntity incident;
+        if (existing.isPresent()) {
+            incident = existing.get();
             incident.update(
                     candidate.severity(),
                     narrative.title(),
@@ -68,6 +53,20 @@ public class IncidentReconciler {
                     now,
                     candidate.eventIds().size(),
                     candidate.evidence());
+        } else {
+            incident =
+                    new IncidentEntity(
+                            candidate.ruleCode(),
+                            candidate.groupingKey(),
+                            candidate.severity(),
+                            narrative.title(),
+                            narrative.summary(),
+                            candidate.windowStart(),
+                            candidate.startedAt(),
+                            candidate.endedAt(),
+                            now,
+                            candidate.eventIds().size(),
+                            candidate.evidence());
         }
         incident = incidentRepository.save(incident);
 

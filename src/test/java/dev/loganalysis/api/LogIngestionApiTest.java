@@ -149,6 +149,29 @@ class LogIngestionApiTest {
     }
 
     @Test
+    void repeatedErrorWindowsUseExclusiveEndBoundaries() throws Exception {
+        String request =
+                """
+        {
+          "format": "APPLICATION",
+          "entries": [
+            {"line":"2026-07-30T10:04:01Z ERROR [catalog] [catalog-1] Lookup failed item=101"},
+            {"line":"2026-07-30T10:04:02Z ERROR [catalog] [catalog-1] Lookup failed item=102"},
+            {"line":"2026-07-30T10:04:03Z ERROR [catalog] [catalog-1] Lookup failed item=103"},
+            {"line":"2026-07-30T10:04:04Z ERROR [catalog] [catalog-1] Lookup failed item=104"},
+            {"line":"2026-07-30T10:05:00Z ERROR [catalog] [catalog-1] Lookup failed item=105"}
+          ]
+        }
+        """;
+
+        mockMvc.perform(post("/api/v1/log-events").contentType("application/json").content(request))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.acceptedCount").value(5));
+
+        assertThat(incidentRepository.count()).isZero();
+    }
+
+    @Test
     void importsFileAsynchronouslyAndReportsSafeRejectionSample() throws Exception {
         MockMultipartFile file =
                 new MockMultipartFile(
